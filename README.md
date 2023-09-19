@@ -1,2 +1,2 @@
-# mini-pc
-咪咪社交后台管理端
+# bbang-front-end
+ 视频管理端

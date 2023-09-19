@@ -1,0 +1,30 @@
+export interface Posts {
+  id: number;
+  postsContent: string;
+  userId: number;
+  circleId: number;
+  tagsId: string;
+  feeCoin: number;
+  imgCount: number;
+  isInformation: number;
+  isExamine: number;
+  overruleContent: string;
+  overruleIsRead: number;
+  postsState: number;
+  device: string;
+  ip: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  province: string;
+  city: string;
+  district: string;
+  isSticky: number;
+  isReward: number;
+  isBlur: string;
+  weight: string;
+  degree: number;
+  lastReplyAt: string;
+  createTime: string;
+  updateTime: string;
+}
