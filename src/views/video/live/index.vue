@@ -159,9 +159,9 @@
 		 </template>
 		 
          <!--头像-->
-          <template #thumb="{ record }">
+          <template #domainThumb="{ record }">
 				<a-avatar :size="50" class="info-avatar">
-				  <img v-if="record.thumb" :src="record.thumb" />
+				  <img v-if="record.domainThumb" :src="record.domainThumb" />
 				</a-avatar>          
           </template>		  		 
 		 
@@ -320,10 +320,10 @@
     },
     {
       title: '头像',
-      dataIndex: 'thumb',
+      dataIndex: 'domainThumb',
       width: 150,
       display: true,
-      slotName: 'thumb',
+      slotName: 'domainThumb',
       tooltip: true,
       ellipsis: true,
     },

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { reactive, watch, ref, getCurrentInstance, nextTick } from 'vue';
+import { reactive, watch, ref, getCurrentInstance } from 'vue';
 import axios from 'axios';
 import { TableColumnData } from '@arco-design/web-vue';
 import { DeepPartial } from '@/components/crud/typings';
@@ -69,6 +69,8 @@ const CrudStatus = {
   DELETING: 7,
   NEED_DOWNLOAD: 8,
   DOWNLOADING: 9,
+  NEED_LOAD: 10,
+  LOADING: 11,
 };
 
 // 分页信息接口
@@ -123,6 +125,7 @@ interface CrudOptions<T> {
 interface CrudMethod {
   refresh: () => void;
   add: () => void;
+  load: () => void;
   update: () => void;
   delete: () => void;
   download: () => void;
@@ -151,6 +154,14 @@ interface CrudHook {
   beforeRefresh: () => boolean;
   /** 刷新 - 之后 */
   afterRefresh: () => void;
+  
+  
+  /** 加载 - 之前 */
+  beforeLoad: () => boolean;
+  /** 加载- 之后 */
+  afterLoad: () => void;
+  
+  
   /** 删除 - 之前 */
   beforeDelete: () => boolean;
   /** 删除 - 之后 */
@@ -222,6 +233,12 @@ const useCrud = <T>(opt: DeepPartial<CrudOptions<T>>) => {
     beforeRefresh: () => true,
     /** 刷新 - 之后 */
     afterRefresh: () => {},
+	
+	/** 加载 - 之前 */
+	beforeLoad: () => true,
+	/** 加载 - 之后 */
+	afterLoad: () => {},
+	
     /** 删除 - 之前 */
     beforeDelete: () => true,
     /** 删除 - 之后 */
@@ -369,6 +386,7 @@ const useCrud = <T>(opt: DeepPartial<CrudOptions<T>>) => {
       update.setStatus(CrudStatus.NORMAL);
       hook.afterRefresh();
     },
+	
     add: async () => {
       if (options.debug) {
         console.log(`[CRUD:debug:${options.tag}] : add`);
@@ -417,12 +435,39 @@ const useCrud = <T>(opt: DeepPartial<CrudOptions<T>>) => {
       method.refresh();
       hook.afterDelete();
     },
+	load: async () => {
+	  if (options.debug) {
+	    console.log(`[CRUD:debug:${options.tag}] : load`);
+	  }
+	  if (!hook.beforeLoad()) {
+	    status.value = CrudStatus.NORMAL;
+	    return;
+	  }
+	  status.value = CrudStatus.LOADING;
+	  options.form = {};
+	  const result = (await axios.get(options.url+"/load", {
+		params: {
+			id: options.tableInfo.selectKeys[0]
+		}
+	  })) as any;
+	  if (result.code === 20000) {
+		options.form =result.data;
+	    global.$notification.success('加载数据成功');
+	  } else {
+	    global.$notification.warning(`加载数据失败:${result.msg}`);
+	  }
+	  
+	  status.value = CrudStatus.NORMAL;
+	
+	  method.refresh();
+	  hook.afterLoad();
+	},
     update: async () => {
       if (!hook.beforeEdit()) {
         status.value = CrudStatus.NORMAL;
         return;
       }
-      console.log('update');
+
       status.value = CrudStatus.UPDATING;
 
       const dealtForm: any[] = [];
@@ -497,7 +542,12 @@ const useCrud = <T>(opt: DeepPartial<CrudOptions<T>>) => {
       status.value = CrudStatus.DOWNLOADING;
       const data = await axios.get(`${options.url}/download`, {
         responseType: 'blob',
+		params:{
+			...options.query,
+		}
       });
+	
+	  
       downloadFile(data, options.tag, 'xlsx');
       status.value = CrudStatus.NORMAL;
     },

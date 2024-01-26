@@ -287,7 +287,7 @@
       title: 'ID',
       dataIndex: 'id',
       width: 100,
-      display: false,
+      display: true,
       slotName: 'id',
       tooltip: true,
       ellipsis: true,

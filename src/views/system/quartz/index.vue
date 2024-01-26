@@ -155,6 +155,14 @@
                   </a-radio-group>
                 </a-form-item>
               </a-col>
+			  <a-col :span="12">
+			    <a-form-item
+			      field="pauseMethod"
+			      label="暂停方法"
+			    >
+			      <a-input v-model="crud.options.form.pauseMethod" />
+			    </a-form-item>
+			  </a-col>
             </a-row>
             <!--参数内容-->
             <a-row>
@@ -563,6 +571,37 @@
               </template>
             </a-trigger>
           </template>
+		  <!--方法名称-->
+          <template #pauseMethod="{ record }">
+            <!--正常情况下-->
+            <div v-show="!record.editable && !crud.options.tableInfo.isEdit">
+              {{ record.pauseMethod }}
+            </div>
+
+            <!--修改完毕提交后/未修改的行(若修改全部成功则不会显示)-->
+            <div v-if="!record.editable && crud.options.tableInfo.isEdit">
+              <!--未修改的行-->
+              <div v-show="!crud.options.form[record.id]">
+                {{ record.pauseMethod }}
+              </div>
+              <!--修改完毕提交后-->
+              <div v-if="crud.options.form[record.id]">
+                {{
+                  crud.options.form[record.id].pauseMethod
+                    ? crud.options.form[record.id].pauseMethod
+                    : record.pauseMethod
+                }}
+              </div>
+            </div>
+
+            <!--修改情况下-->
+            <div v-if="record.editable">
+              <a-input
+                v-model="crud.options.form[record.id].pauseMethod"
+                :default-value="record.pauseMethod"
+              ></a-input>
+            </div>
+          </template>		  
           <!--失败后暂停-->
           <template #pauseAfterFailure="{ record }">
             <a-switch
@@ -644,6 +683,14 @@
       slotName: 'jobName',
       fixed: 'left',
     },
+	{
+	  title: t('system.quartz.table.isPause'),
+	  dataIndex: 'isPause',
+	  width: 160,
+	  display: true,
+	  slotName: 'isPause',
+	  fixed: 'left',
+	},
     {
       title: t('system.quartz.table.description'),
       dataIndex: 'description',
@@ -657,14 +704,6 @@
       width: 160,
       display: true,
       slotName: 'cronExpression',
-    },
-
-    {
-      title: t('system.quartz.table.isPause'),
-      dataIndex: 'isPause',
-      width: 160,
-      display: true,
-      slotName: 'isPause',
     },
     {
       title: t('system.quartz.table.beanName'),
@@ -717,6 +756,13 @@
       display: true,
       slotName: 'pauseAfterFailure',
     },
+	{
+	  title: t('system.quartz.table.pauseMethod'),
+	  dataIndex: 'pauseMethod',
+	  width: 160,
+	  display: true,
+	  slotName: 'pauseMethod',
+	},
     {
       title: t('system.user.table.createTime'),
       dataIndex: 'createTime',

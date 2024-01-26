@@ -115,6 +115,9 @@
           :edit-permission="['pay:order:edit']"
           :del-permission="['pay:order:del']"
           :download-permission="['pay:order:list']"
+		  
+		  :show-edit="false"
+	
           style="margin-bottom: 12px"
         >
 		<template #right>

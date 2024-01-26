@@ -423,7 +423,6 @@
   import CrudOperation from '@/components/crud/CrudOperation.vue';
   import RROperation from '@/components/crud/RROperation.vue'
   import Pagination from '@/components/crud/Pagination.vue';
-  import axios from 'axios';
   import { useI18n } from 'vue-i18n';
 
   const { t } = useI18n();
@@ -443,8 +442,6 @@
 
   // 字典
   const dict = useDict('yes_no_status');
-  const instance = getCurrentInstance();
-  const global = (instance as any).appContext.config.globalProperties;
 
   // 设置关联视频设置 columns信息
   crud.update.setTableColumns([

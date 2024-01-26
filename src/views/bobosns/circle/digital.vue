@@ -1,5 +1,5 @@
 <template>
-	<a-modal :visible="visible" width="80vw" @cancel="visible = false">
+	<a-modal :visible="visible" width="80vw" @cancel="visible = false" >
 		<template #title>设置<span style="color: red">{{circleName}}</span>关联视频</template>
 		<a-space direction="vertical">
 			<!--检索条件栏-->
@@ -29,7 +29,6 @@
                     <a-form-item field="videoKindId" label="视频大分类">
                       <a-select
                         v-model="crud.options.query.videoKindId"
-						@change="loadCategoryData"
                         placeholder="输入视频大分类搜索"
                         allow-search
 						allow-clear
@@ -114,7 +113,7 @@
 								>
 								  <a-select
 									v-model="crud.options.form.videoKindId"
-									@change="loadCategoryData"
+									
 									placeholder="请选择"
 									allow-clear
 									allow-search
@@ -567,25 +566,46 @@
 	};
 
    
+   const categoryMap = ref<{ [key : number] : Category }>({});
+   const loadCategoryData = async (e) => {
+   
+   	crud.options.form.videoCategoryId="";
+   	const categoryList = await CategoryList(e);
+   	categoryMap.value = {};
+   	categoryList.data.list.forEach((val) => {
+   		categoryMap.value[val.id] = val;
+   	});
+   };
+   
+   
 	const kindMap = ref<{ [key : number] : Kind }>({});
-	const loadKindData = async (e) => {		
+	const loadKindData = async (e:any) => {		
 		
+		crud.options.form.videoKindId="";
+		crud.options.query.videoKindId="";
+		crud.options.query.videoCategoryId="";
+		
+	
 		const kindList = await KindList(e);
 		kindMap.value = {};
 		kindList.data.list.forEach((val) => {
 			kindMap.value[val.id] = val;
 		});
+		
+		//  加载小分类
+		loadCategoryData(e);
+		
 	};
 
-	const categoryMap = ref<{ [key : number] : Category }>({});
-	const loadCategoryData = async (e) => {
-    
-		const categoryList = await CategoryList(e);
-		categoryMap.value = {};
-		categoryList.data.list.forEach((val) => {
-			categoryMap.value[val.id] = val;
-		});
-	};
+	const refreshData = async (id:number) => {
+		crud.options.query.circleId=id;
+		crud.options.form.circleId=id;
+		crud.method.refresh();
+	}
+	// 暴露方法
+	defineExpose({
+		refreshData
+	});
 	
 	
 	onMounted(() => {
@@ -593,16 +613,17 @@
 		crud.method.refresh();
 	});
 	
-	crud.hook.beforeOpenAdd = () => {
+	/* crud.hook.beforeOpenAdd = () => {
 		crud.options.query.circleId=circleId;
 		crud.options.form.circleId=circleId;
+		
 		return true;
 	};
 	crud.hook.afterResetParams = () => {
 		crud.options.query.circleId=circleId;
 		crud.options.form.circleId=circleId;
 		return true;
-	};
+	}; */
 	
 	
 </script>

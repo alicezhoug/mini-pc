@@ -34,6 +34,7 @@ export default {
   'system.quartz.table.email': '告警邮箱',
   'system.quartz.table.subTask': '子任务',
   'system.quartz.table.pauseAfterFailure': '失败后暂停',
+  'system.quartz.table.pauseMethod':'暂停方法',
   // menu
   'system.menu': '菜单',
   'system.menu.table.title': '标题',

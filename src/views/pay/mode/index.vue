@@ -103,6 +103,8 @@
           :edit-permission="['pay:mode:edit']"
           :del-permission="['pay:mode:del']"
           :download-permission="['pay:mode:list']"
+		  :show-edit="false"
+		  :show-save="true"
           style="margin-bottom: 12px"
         >
           <template #addForm>
@@ -159,6 +161,26 @@
                   </a-select>
                 </a-form-item>
               </a-col>
+			  <a-col :span="12">
+			    <a-form-item
+			      field="supportPayment"
+			      label="支持用户收款"
+			      :rules="[{ required: true, message: '支持用户收款' }]"
+			    >
+			      <a-select
+			        v-model="crud.options.form.supportPayment"
+			        placeholder="请选择"
+			        allow-search
+			      >
+			        <a-option
+			          v-for="s in dict.yes_no_status"
+			          :key="s.detailId"
+			          :value="s.value"
+			          >{{ s.label }}</a-option
+			        >
+			      </a-select>
+			    </a-form-item>
+			  </a-col>
               <!--支持提现-->
               <a-col :span="12">
                 <a-form-item
@@ -196,11 +218,15 @@
                   field="country"
                   label="支持国家"
                 >
-                  <a-select v-model="crud.options.form.country" placeholder="请选择" allow-search multiple>
+                  <a-select v-model="crud.options.form.country" 
+				 
+            
+				  placeholder="请选择" allow-search multiple>
                     <a-option
                       v-for="s in countryMap"
                       :key="s.id"
-                      :value="s.id"
+			
+					  :value="s.id.toString()"
                       >{{ s.enName }}</a-option
                     >
                   </a-select>
@@ -803,6 +829,19 @@
 	  
 	  
     },
+	{
+	  title: '支持用户收款',
+	  dataIndex: 'supportPayment',
+	  width: 100,
+	  display: true,
+	  slotName: 'supportPayment',
+	  tooltip: true,
+	  ellipsis: true,
+	  bodyCellStyle,
+	  
+	  
+	},
+	
     {
       title: '支持提现',
       dataIndex: 'withdrawal',
@@ -960,8 +999,14 @@
     }
 
   };
+   crud.hook.afterLoad = () => {
+	   if (crud.options.form.country) {
+		   console.log(crud.options.form.country);
+	       crud.options.form.country = parseToArray(crud.options.form.country);
+	   }
+   };
 
-  crud.hook.beforeRefresh = () => {
+   crud.hook.beforeRefresh = () => {
     if (crud.options.query.country){
       let newStr = '';
       for (let i = 0; i < crud.options.query.country.length; i += 1) {

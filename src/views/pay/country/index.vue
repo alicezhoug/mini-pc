@@ -61,6 +61,8 @@
           :edit-permission="['pay:country:edit']"
           :del-permission="['pay:country:del']"
           :download-permission="['pay:country:list']"
+		  :show-edit="false"
+		  :show-save="true"
           style="margin-bottom: 12px"
         >
           <template #addForm>

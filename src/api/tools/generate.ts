@@ -28,3 +28,8 @@ export interface TableCol {
 export function getTableCols(tableName: string) {
   return axios.get(`/tools/generate/table/columns?tableName=${tableName}`);
 }
+// 返回所有Table信息
+export function getAllTables() {
+  return axios.get(`/tools/generate/table?currentPage=1&pageSize=9999`);
+}
+

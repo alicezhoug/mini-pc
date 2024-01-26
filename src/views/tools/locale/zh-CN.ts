@@ -27,4 +27,6 @@ export default {
   'tools.generate.tableCol.queryType': '查询方式',
   'tools.generate.tableCol.dateAnnotation': '日期注解',
   'tools.generate.tableCol.dictName': '关联字典',
+  'tools.generate.tableCol.refTable': '关联表',
+  
 };

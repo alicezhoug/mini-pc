@@ -120,6 +120,8 @@
           :edit-permission="['bobosns:circle:edit']"
           :del-permission="['bobosns:circle:del']"
           :download-permission="['bobosns:circle:list']"
+		  :show-edit="false" 
+		  :show-save="true"
           style="margin-bottom: 12px"
         >
           <template #addForm>
@@ -135,24 +137,18 @@
               </a-col>
 			  <!--板块ID-->
 			  <a-col :span="12">
-			    <a-form-item
-			      field="plateId"
-			      label="板块"
-			  	  :rules="[{ required: true, message: '板块不能为空' }]"
-			    >
-			      <a-select
-			        v-model="crud.options.form.plateId"
-			        placeholder="请选择"
-			        allow-search
-			      >
-			        <a-option
-			          v-for="s in plateMap"
-			          :key="s.id"
-			          :value="s.id"
-			          >{{ s.plateName }}</a-option
-			        >
-			      </a-select>
-			    </a-form-item>
+			   
+				<a-form-item
+					field="plateId"
+					label="板块"
+					:rules="[{ required: true, message: '板块不能为空' }]"
+				  >
+					<a-tree-select
+					  v-model="crud.options.form.plateId"
+					  :data="crud.options.props.plateTreeData"
+					  placeholder="请选择板块"
+					/>
+				</a-form-item>
 			  </a-col>
 			<!--状态-->
               <a-col :span="12">
@@ -232,20 +228,9 @@
               </a-col>
             </a-row>
           </template>
-		  <template #right>
-		    <a-button
-		      v-if="!crud.options.tableInfo.isEdit"
-		      v-permission="['pay:modeDigital:list']"
-		      type="outline"
-		      size="small"
-		  	  :disabled="!clickIconsId"
-		      class="button"
-		      @click="digitalVisible = true ">
-		      视频关联设置
-		    </a-button>
-		  </template>	
+		  
         </CrudOperation>
-		<Digital />
+		<Digital ref="loadChildData"/>
         <!--表格-->
         <a-table
           ref="table"
@@ -465,38 +450,6 @@
             <div v-show="!record.editable && !crud.options.tableInfo.isEdit">
 			   {{plateMap[record.plateId]?plateMap[record.plateId].plateName:"" }}
             </div>
-
-            <!--修改完毕提交后/未修改的行(若修改全部成功则不会显示)-->
-            <div v-if="!record.editable && crud.options.tableInfo.isEdit">
-              <!--未修改的行-->
-              <div v-show="!crud.options.form[record.id]">
-                {{plateMap[record.plateId]?plateMap[record.plateId].plateName:"" }}
-              </div>
-              <!--修改完毕提交后-->
-              <div v-if="crud.options.form[record.id]">
-                {{
-                  crud.options.form[record.id].plateId
-                    ? crud.options.form[record.id].plateId
-                    : record.plateId
-                }}
-              </div>
-            </div>
-
-            <!--修改情况下-->
-            <div v-if="record.editable">
-              <a-select
-                v-model="crud.options.form[record.id].plateId"
-                :default-value="record.plateId"
-				allow-clear
-              >
-                <a-option
-                  v-for="s in plateMap"
-                  :key="s.id"
-                  :value="s.id"
-                  >{{ s.plateName }}
-                </a-option>
-              </a-select>
-            </div>
           </template>
 
           <!--热门圈子-->
@@ -504,42 +457,6 @@
             <!--正常情况下-->
             <div v-show="!record.editable && !crud.options.tableInfo.isEdit">
               {{ dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (record.isHot ? '1' : '0') || di.value === (record.isHot + '')))[0].label : ''}}
-            </div>
-
-            <!--修改完毕提交后/未修改的行(若修改全部成功则不会显示)-->
-            <div v-if="!record.editable && crud.options.tableInfo.isEdit">
-              <!--未修改的行-->
-              <div v-show="!crud.options.form[record.id]">
-                {{ dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (record.isHot ? '1' : '0') || di.value === (record.isHot + '')))[0].label : '' }}
-              </div>
-              <!--修改完毕提交后-->
-              <div v-if="crud.options.form[record.id]">
-                {{
-                  crud.options.form[record.id].isHot
-                   ? dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (crud.options.form[record.id].isHot ? '1' : '0') || di.value === (record.isHot + '')))[0].label : ''
-                   : dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (record.isHot ? '1' : '0') || di.value === (record.isHot + '')))[0].label : ''
-                }}
-              </div>
-            </div>
-
-            <!--修改情况下-->
-            <div v-if="record.editable">
-              <a-select
-                v-model="crud.options.form[record.id].isHot"
-                :default-value="record.isHot ? '1' : '0'"
-                allow-search
-              >
-                <a-option
-                  v-for="s in dict.yes_no_status.map((di) => {
-                    if (di.value === 'true') di.value = '1';
-                    if (di.value === 'false') di.value = '0';
-                    return di;
-                  })"
-                  :key="s.detailId"
-                  :value="s.value"
-                  >{{ s.label }}
-                </a-option>
-              </a-select>
             </div>
           </template>
 
@@ -550,42 +467,6 @@
             <div v-show="!record.editable && !crud.options.tableInfo.isEdit">
               {{ dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (record.isTopRecommend ? '1' : '0') || di.value === (record.isTopRecommend + '')))[0].label : ''}}
             </div>
-
-            <!--修改完毕提交后/未修改的行(若修改全部成功则不会显示)-->
-            <div v-if="!record.editable && crud.options.tableInfo.isEdit">
-              <!--未修改的行-->
-              <div v-show="!crud.options.form[record.id]">
-                {{ dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (record.isTopRecommend ? '1' : '0') || di.value === (record.isTopRecommend + '')))[0].label : '' }}
-              </div>
-              <!--修改完毕提交后-->
-              <div v-if="crud.options.form[record.id]">
-                {{
-                  crud.options.form[record.id].isTopRecommend
-                   ? dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (crud.options.form[record.id].isTopRecommend ? '1' : '0') || di.value === (record.isTopRecommend + '')))[0].label : ''
-                   : dict.yes_no_status ? (dict.yes_no_status.filter((di: any) => di.value === (record.isTopRecommend ? '1' : '0') || di.value === (record.isTopRecommend + '')))[0].label : ''
-                }}
-              </div>
-            </div>
-
-            <!--修改情况下-->
-            <div v-if="record.editable">
-              <a-select
-                v-model="crud.options.form[record.id].isTopRecommend"
-                :default-value="record.isTopRecommend ? '1' : '0'"
-                allow-search
-              >
-                <a-option
-                  v-for="s in dict.yes_no_status.map((di) => {
-                    if (di.value === 'true') di.value = '1';
-                    if (di.value === 'false') di.value = '0';
-                    return di;
-                  })"
-                  :key="s.detailId"
-                  :value="s.value"
-                  >{{ s.label }}
-                </a-option>
-              </a-select>
-            </div>
           </template>
 		  
           <!--状态-->
@@ -593,37 +474,13 @@
 				{{ dict.circle_state ? (dict.circle_state.filter((di: any) => di.value === record.circleState || di.value === (record.circleState + '')))[0].label : ''}}
           </template>
 
-          <!--驳回原因-->
-          <template #reject="{ record }">
-            <!--正常情况下-->
-            <div v-show="!record.editable && !crud.options.tableInfo.isEdit">
-              {{ record.reject }}
-            </div>
-
-            <!--修改完毕提交后/未修改的行(若修改全部成功则不会显示)-->
-            <div v-if="!record.editable && crud.options.tableInfo.isEdit">
-              <!--未修改的行-->
-              <div v-show="!crud.options.form[record.id]">
-                {{ record.reject }}
-              </div>
-              <!--修改完毕提交后-->
-              <div v-if="crud.options.form[record.id]">
-                {{
-                  crud.options.form[record.id].reject
-                    ? crud.options.form[record.id].reject
-                    : record.reject
-                }}
-              </div>
-            </div>
-
-            <!--修改情况下-->
-            <div v-if="record.editable">
-              <a-input
-                v-model="crud.options.form[record.id].reject"
-                :default-value="record.reject"
-              />
-            </div>
-          </template>
+		  <template #optional="{ record }">
+		  	<a-space>
+		  				
+		  		<a-button @click="digitalVisible = true;handleEditClick(record.id)">视频关联</a-button>
+		  	</a-space>
+		  	
+		  </template>
 
         </a-table>
         <Pagination
@@ -643,7 +500,7 @@
   import RROperation from '@/components/crud/RROperation.vue'
   import Pagination from '@/components/crud/Pagination.vue';
   
-  import { Plate,PlateList} from '@/api/bobosns/plate';
+  import { Plate,AllPlateList,getPlateTree} from '@/api/bobosns/plate';
   import { Circle,iconUpload } from '@/api/bobosns/circle';
   import { useI18n } from 'vue-i18n';
   import Digital from '@/views/bobosns/circle/digital.vue';
@@ -686,12 +543,22 @@
 	const plateMap = ref<{ [key : number] : Plate }>({});
 	const loadData = async () => {
 
-		const plateList = await PlateList();
-		plateMap.value = {};
+		const plateList = await AllPlateList();
+		
 		plateList.data.list.forEach((val) => {
 			plateMap.value[val.id] = val;
 		});
 	};
+	
+	
+	crud.hook.beforeOpenAdd = () => {
+	  // 查部门列表树
+	  getPlateTree().then(({ data }) => {
+	    crud.options.props.plateTreeData = data;
+	  });
+	  return true;
+	};
+	
 	
 	
 
@@ -861,6 +728,16 @@
       tooltip: true,
       ellipsis: true,
     },
+	{
+		title: 'Optional',
+		width: 150,
+		display: true,
+		align: 'center',
+		slotName: 'optional',
+		tooltip: true,
+		ellipsis: true,
+		fixed: 'right',
+	},
   ]);
   const tableColumns = computed(() => {
     return crud.options.tableInfo.columns?.filter((val) => val.display);
@@ -910,8 +787,21 @@
 	loadData();
     crud.method.refresh();
   });
+  
+ 
+  crud.hook.afterLoad =() =>{	
+  	crud.options.form.circleState=String(crud.options.form.circleState);
+	crud.options.form.isHot=String(Number(crud.options.form.isHot));
+  	return true;
+  };
 
-
+  // 定义与 ref 同名变量
+  const loadChildData = ref<any>()
+   
+  const handleEditClick = (id : number) => {
+		loadChildData.value.refreshData(id);
+   };
+  
 
   
   

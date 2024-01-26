@@ -78,6 +78,8 @@
 				<a-divider style="margin-top: 0" />
 				<CrudOperation :add-permission="['pay:merchant:add']" :edit-permission="['pay:merchant:edit']"
 					:del-permission="['pay:merchant:del']" :download-permission="['pay:merchant:list']"
+					:show-edit="false"
+					:show-save="true"
 					style="margin-bottom: 12px">
 					<template #addForm>
 						<a-row :gutter="12">

@@ -14,6 +14,8 @@ export default {
   'menu.bobosns.config': '系统配置',
   'menu.bobosns.config.search': '输入名称进行搜索',
   'menu.bobosns.circleUser': '平台用户',
+  'menu.bobosns.notice': '通知管理',
+  'menu.bobosns.chat': '聊天管理',
   
 };
 

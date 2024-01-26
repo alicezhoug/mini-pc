@@ -71,12 +71,14 @@
 							v-model="crud.options.query.showApp"
 							placeholder="输入是否显示前端搜索"
 							allow-search
+							allow-clear
 
 						  >
 							<a-option
 							  v-for="s in dict.yes_no_status"
 							  :key="s.detailId"
 							  :value="s.value"
+							
 							>
 							  {{ s.label }}
 							</a-option>
@@ -106,6 +108,8 @@
 							:del-permission="['bobosns:config:del']"
 							:download-permission="['bobosns:config:list']"
 							:showDownload="false"
+							:show-edit="false" 
+							:show-save="true"
 							 style="margin-bottom: 12px">
 							<template #addForm>
 								<a-row :gutter="12">
@@ -121,6 +125,7 @@
 										<a-form-item field="category" label="类型"
 											:rules="[{ required: true, message: '类型不能为空' }]">
 											<a-select v-model="crud.options.form.category" placeholder="请选择"
+												allow-clear
 												allow-search>
 												<a-option v-for="s in dict.data_category" :key="s.detailId"
 													:value="s.value">{{ s.label }}</a-option>
@@ -139,6 +144,7 @@
 									      v-model="crud.options.form.status"
 									      placeholder="请选择"
 									      allow-search
+										  allow-clear
 									    >
 									      <a-option
 									        v-for="s in dict.yes_no_status"
@@ -160,6 +166,7 @@
 										v-model="crud.options.form.showApp"
 										placeholder="请选择"
 										allow-search
+										allow-clear
 									  >
 										<a-option
 										  v-for="s in dict.yes_no_status"
@@ -298,33 +305,6 @@
 								
 									{{ dict.data_category ? (dict.data_category.filter((di: any) => di.value === record.category || di.value === (record.category + '')))[0].label : ''}}
 											 
-								</div>
-
-								<!--修改完毕提交后/未修改的行(若修改全部成功则不会显示)-->
-								<div v-if="!record.editable && crud.options.tableInfo.isEdit">
-									<!--未修改的行-->
-									<div v-show="!crud.options.form[record.id]">
-										{{ dict.data_category ? (dict.data_category.filter((di: any) => di.value === record.category || di.value === (record.category + '')))[0].label : ''}}
-												 
-									</div>
-									<!--修改完毕提交后-->
-									<div v-if="crud.options.form[record.id]">
-										{{
-                  crud.options.form[record.id].category
-                    ? crud.options.form[record.id].category
-                    : record.category
-                }}
-									</div>
-								</div>
-
-								<!--修改情况下-->
-								<div v-if="record.editable">
-									<a-select v-model="crud.options.form[record.id].category"
-										:default-value="record.category.toString()">
-										<a-option v-for="s in dict.data_category" :key="s.detailId"
-											:value="s.value">{{ s.label }}
-										</a-option>
-									</a-select>
 								</div>
 							</template>
 
@@ -589,7 +569,7 @@
 	import { useCrud, CrudStatus } from '@/components/crud/CRUD';
 	import { Config,getConfigTree } from '@/api/bobosns/config';
 	import { Icons,IconsList} from '@/api/bobosns/icons';
-	import { computed, getCurrentInstance, onMounted, provide, ref } from 'vue';
+	import { computed, onMounted, provide, ref } from 'vue';
 	import { useDict } from '@/components/dict';
 	import CrudOperation from '@/components/crud/CrudOperation.vue';
 	import RROperation from '@/components/crud/RROperation.vue'
@@ -628,8 +608,7 @@
 	
 
 	// 字典
-	const dict = useDict('data_category','yes_no_status');
-	const instance = getCurrentInstance();
+	const dict = useDict('yes_no_status','data_category');
 	
 
 	// 设置系统配置 columns信息
@@ -823,7 +802,11 @@
 		loadData();
 		crud.method.refresh();
 	});
-
+    crud.hook.afterLoad =() =>{
+		
+		crud.options.form.category=String(crud.options.form.category);
+		return true;
+	};
 
 	crud.hook.afterRefresh = () => {
 		loadConfigTree();

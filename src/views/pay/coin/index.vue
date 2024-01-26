@@ -31,6 +31,8 @@
           :edit-permission="['pay:coin:edit']"
           :del-permission="['pay:coin:del']"
           :download-permission="['pay:coin:list']"
+		  :show-edit="false"
+		  :show-save="true"
           style="margin-bottom: 12px"
         >
           <template #addForm>
@@ -57,12 +59,13 @@
                     placeholder="请选择"
                     allow-search
                   >
+				 
                     <a-option
                       v-for="s in dict.yes_no_status"
                       :key="s.detailId"
-                      :value="s.value"
-                      >{{ s.label }}</a-option
-                    >
+                      :value="s.value">
+					  {{ s.label }}
+					</a-option>
                   </a-select>
                 </a-form-item>
               </a-col>
@@ -243,7 +246,7 @@
   import CrudOperation from '@/components/crud/CrudOperation.vue';
   import RROperation from '@/components/crud/RROperation.vue'
   import Pagination from '@/components/crud/Pagination.vue';
-  import axios from 'axios';
+  
   import { useI18n } from 'vue-i18n';
 
   const { t } = useI18n();
@@ -263,8 +266,7 @@
 
   // 字典
   const dict = useDict('yes_no_status');
-  const instance = getCurrentInstance();
-
+  
   // 设置金币设置 columns信息
   crud.update.setTableColumns([
     {

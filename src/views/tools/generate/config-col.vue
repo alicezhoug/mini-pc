@@ -92,26 +92,38 @@
         :default-value="record.dictName"
         allow-search
       >
-        <a-option value=""> 空 </a-option>
+	    <a-option value="">空</a-option>
         <a-option v-for="dict in dictInfo" :key="dict.id">
           {{ dict.name }}
         </a-option>
       </a-select>
     </template>
+	<!--关联表-->
+	<template #refTable="{ record }">
+	  <a-select
+	    v-model="form[record.columnId].refTable"
+	    placeholder="请选择"
+	    :default-value="record.refTable"
+	    allow-search
+	  >
+	    <a-option value="">空</a-option>
+	    <a-option v-for="d in dbTablesInfo" :key="d.tableName">
+	      {{ d.tableName }}
+	    </a-option>
+	  </a-select>
+	</template>
   </a-table>
 </template>
 
 <script lang="ts" setup>
   // 字段设置
-  import { getCurrentInstance, inject, onMounted, reactive, ref } from 'vue';
+  import { inject, onMounted, ref } from 'vue';
   import useLoading from '@/hooks/loading';
   import { useI18n } from 'vue-i18n';
-  import { getTableCols } from '@/api/tools/generate';
+  import { getTableCols, getAllTables} from '@/api/tools/generate';
   import { getDict } from '@/api/system/dict';
 
   const { t } = useI18n();
-  const instance = getCurrentInstance();
-  const global = (instance as any).appContext.config.globalProperties;
 
   const info: any = inject('info');
   const col = ref([]);
@@ -135,7 +147,7 @@
     {
       title: t('tools.generate.tableCol.remark'),
       dataIndex: 'remark',
-      width: 100,
+      width: 120,
       slotName: 'remark',
     },
     {
@@ -169,20 +181,27 @@
       slotName: 'queryType',
     },
     {
-      title: t('tools.generate.tableCol.dateAnnotation'),
-      dataIndex: 'dateAnnotation',
-      width: 165,
-      slotName: 'dateAnnotation',
-    },
-    {
       title: t('tools.generate.tableCol.dictName'),
       dataIndex: 'dictName',
       width: 150,
       slotName: 'dictName',
     },
+	{
+	  title: t('tools.generate.tableCol.refTable'),
+	  dataIndex: 'refTable',
+	  width: 200,
+	  slotName: 'refTable',
+	},
+	{
+	  title: t('tools.generate.tableCol.dateAnnotation'),
+	  dataIndex: 'dateAnnotation',
+	  width: 165,
+	  slotName: 'dateAnnotation',
+	},
   ]);
   const form = inject<{ [key: string]: any }>('form');
   const dictInfo = ref([]);
+  const dbTablesInfo = ref([]);
   const table = useLoading(true);
 
   // 获取表格字段数据
@@ -192,6 +211,14 @@
     col.value.forEach((val: any) => {
       (form as any)[val.columnId] = { id: val.columnId };
     });
+	
+	const allTable=await getAllTables();	
+	dbTablesInfo.value=allTable.data.list;
+	
+	
+	
+	
+	
     const dict = await getDict();
     dictInfo.value = dict.data.list;
     table.setLoading(false);

@@ -41,6 +41,8 @@
           :edit-permission="['pay:platform:edit']"
           :del-permission="['pay:platform:del']"
           :download-permission="['pay:platform:list']"
+		  :show-edit="false" 
+		  :show-save="true"
           style="margin-bottom: 12px"
         >
           <template #addForm>

@@ -21,10 +21,33 @@
             <slot name="addForm"></slot>
           </a-form>
         </a-modal>
+		
+        <a-modal
+          v-model:visible="editVisible"
+          :mask-closable="false"
+          :title="$t('crud.edit') + $t(crud.options.title)"
+          :popup-container="rootDiv"
+          :width="650"
+          @cancel="handleCancel"
+          @before-ok="handleBeforeOk"
+          @before-open="handleBeforeOpenEdit"
+        >
+          <a-form
+            ref="addForm"
+            :model="crud.options.form"
+            :style="{ marginTop: '10px' }"
+            auto-label-width
+          >
+            <slot name="addForm"></slot>
+          </a-form>
+        </a-modal>
+				
         <a-space>
           <!--左侧插槽-->
           <slot name="left" />
-          <!--新增,修改,删除,下载-->
+          <!--新增,保存（dialog）,修改(table),删除,下载-->
+		  
+		  
           <a-button
             v-if="!crud.options.tableInfo.isEdit && props.showAdd"
             v-permission="props.addPermission"
@@ -35,9 +58,29 @@
           >
             <template #icon>
               <icon-plus />
-            </template>
+            </template>			
             {{ $t('crud.add') }}
           </a-button>
+		  
+          <a-button
+            v-if="!crud.options.tableInfo.isEdit && props.showSave"
+            v-permission="props.editPermission"
+            :disabled="
+              crud.options.tableInfo.selectKeys.length === 0 ||
+              !props.enabledAdd ||
+              disableAll
+            "
+            type="outline"
+            size="small"
+            status="success"			
+			@click="editVisible = true"
+          >
+            <template #icon>
+              <icon-edit />
+            </template>
+             {{ props.editText }}
+          </a-button>
+					
           <a-button
             v-if="!crud.options.tableInfo.isEdit && props.showEdit"
             v-permission="props.editPermission"
@@ -48,8 +91,8 @@
             "
             type="outline"
             size="small"
-            status="success"
-            @click="editClick"
+            status="success"			
+			@click="editClick"
           >
             <template #icon>
               <icon-edit />
@@ -217,11 +260,9 @@
 
 <script lang="ts" setup>
   import { CrudStatus, CRUD } from '@/components/crud/CRUD';
-  import { inject, ref, reactive, getCurrentInstance, computed } from 'vue';
+  import { inject, ref, getCurrentInstance, computed } from 'vue';
   import { ValidatedError } from '@arco-design/web-vue/es/form/interface';
-  import axios from 'axios';
-  import { TableData } from '@arco-design/web-vue/es/table/interface';
-
+  
   const crud = inject('crud') as CRUD<any>;
   const instance = getCurrentInstance();
   const global = (instance as any).appContext.config.globalProperties;
@@ -232,6 +273,7 @@
       showEdit?: boolean;
       showDel?: boolean;
       showDownload?: boolean;
+	  showSave?: boolean;
       enabledAdd?: boolean;
       enabledEdit?: boolean;
       enabledDel?: boolean;
@@ -244,10 +286,13 @@
       editPermission?: string[];
       delPermission?: string[];
       downloadPermission?: string[];
+	  editText?:string;
     }>(),
     {
+	  editText:"编辑",
       showAdd: true,
       showEdit: true,
+	  showSave:false,
       showDel: true,
       showDownload: true,
       enabledAdd: true,
@@ -280,6 +325,7 @@
 
   // region    ↓-------------------------------- add表单 --------------------------------↓
   const addVisible = ref(false);
+  const editVisible= ref(false);
   const addForm = ref(null);
   const rootDiv = ref(null);
 
@@ -290,9 +336,19 @@
       addVisible.value = false;
     }
   };
-
+  const handleBeforeOpenEdit = () => {
+    if (!crud.hook.beforeOpenAdd()) {
+      addVisible.value = false;
+    }
+  	crud.method.load();
+  
+  };
+  
+ 
+  
   const handleBeforeOk = async (done: any) => {
     let validate = false;
+	// 确定之前验证
     await (addForm.value as any).validate(
       (errors: undefined | Record<string, ValidatedError>) => {
         if (!errors) validate = true;
@@ -303,8 +359,9 @@
       await crud.method.add();
       if (crud.options.props.addForm.success) {
         global.$notification.success('添加成功');
-        done();
+		//  清空表单数据
 		crud.update.setForm({});
+        done();
       } else {
         global.$notification.warning(
           `添加失败:${crud.options.props.addForm.reason}`
@@ -315,15 +372,17 @@
       done(false);
     }
   };
+  
 
   const handleCancel = () => {
+	//  清空表单数据
     crud.update.setForm({});
     addVisible.value = false;
   };
   // endregion ↑-------------------------------- add表单 --------------------------------↑
   // region    ↓-------------------------------- edit表单 --------------------------------↓
 
-  // 点击修改触发
+  // 网格修改编辑触发
   const editClick = async () => {
     const canEdit = await crud.hook.beforeOpenEdit();
     if (!canEdit) {

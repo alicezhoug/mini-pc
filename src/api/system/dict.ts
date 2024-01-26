@@ -20,6 +20,8 @@ export function getDictDetail(dictName?: string) {
   });
 }
 
+
+
 export function getDict() {
   return axios.get('/system/dict?currentPage=1&pageSize=9999');
 }

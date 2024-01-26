@@ -20,3 +20,26 @@ export function PlateList() {
     '/bobosns/plate?pageSize=1000&currentPage=1'
   );
 }
+export function AllPlateList() {
+  return axios.get<BaseResp<Plate>>(
+    '/bobosns/plate/all'
+  );
+}
+
+
+export function PlateListWithCircle() {
+  return axios.get<BaseResp<Plate>>(
+    '/bobosns/plate/listByCircle'
+  );
+}
+
+export interface ConfigTree {
+  children: ConfigTree[];
+  key: number;
+  title: string;
+}
+
+export function getPlateTree() {
+  return axios.get<ConfigTree[]>('/bobosns/plate/listTree');
+}
+

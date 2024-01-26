@@ -1,5 +1,5 @@
-import { getDictDetail } from '@/api/system/dict';
-import { onMounted, ref } from 'vue';
+import { getDictDetail,getDictDetailWithValue } from '@/api/system/dict';
+import { ref } from 'vue';
 
 // eslint-disable-next-line import/prefer-default-export
 export function useDict(...dictNames: string[]) {
@@ -15,6 +15,32 @@ export function useDict(...dictNames: string[]) {
     });
     return res.value;
   })();
+}
+
+
+// eslint-disable-next-line import/prefer-default-export
+export function useDictWithNumber(...dictNames: string[]) {
+	
+  const res: {
+    [key: string]: any;
+  } = ref({});
+  
+  return (() => {
+    dictNames.forEach((d) => {
+      getDictDetail(d).then((resp) => {	
+		
+		  const newArr =ref();
+		  resp.data.forEach((item)=>{
+			 newArr.value.push(item);
+		  });
+		  res.value[d] = newArr
+		 
+         
+      });
+    });
+    return res.value;
+  })();
+  
 }
 
 
